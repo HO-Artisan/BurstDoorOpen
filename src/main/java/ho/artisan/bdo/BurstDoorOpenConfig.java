@@ -2,7 +2,7 @@ package ho.artisan.bdo;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
-public class BurstDoorOpenConfig {
+public final class BurstDoorOpenConfig {
     public static ForgeConfigSpec COMMON_CONFIG;
     public static ForgeConfigSpec.BooleanValue IRON_DOOR_BREAK_FLAG;
 
