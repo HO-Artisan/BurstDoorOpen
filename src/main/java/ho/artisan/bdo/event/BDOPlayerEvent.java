@@ -62,18 +62,20 @@ public final class BDOPlayerEvent {
         level.gameEvent(player, GameEvent.BLOCK_OPEN, pos);
 
         var side = state.getValue(DoorBlock.HINGE);
-        pos = side == DoorHingeSide.RIGHT
-                ? pos.offset(-face.getStepZ(), face.getStepY(), -face.getStepX())
-                : pos.offset(face.getStepZ(), face.getStepY(), face.getStepX());
+
+        var flag = side == DoorHingeSide.RIGHT;
+        var reverse = (flag ? -1 : 1) * ((face == Direction.NORTH || face == Direction.SOUTH) ? -1 : 1);
+        pos = pos.offset(face.getStepZ() * reverse, face.getStepY(), face.getStepX() * reverse);
 
         state = level.getBlockState(pos);
         if (!state.is(BlockTags.DOORS)) return;
         if (state.getValue(BlockStateProperties.OPEN)) return;
+        if (state.getValue(DoorBlock.HINGE) != (flag ? DoorHingeSide.LEFT : DoorHingeSide.RIGHT)) return;
 
         state = state.cycle(DoorBlock.OPEN);
         level.setBlock(pos, state, 10);
         level.gameEvent(player, GameEvent.BLOCK_OPEN, pos);
-        }
+    }
 
 
     @SuppressWarnings("unused")
