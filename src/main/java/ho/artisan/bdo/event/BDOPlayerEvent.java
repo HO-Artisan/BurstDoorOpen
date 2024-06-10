@@ -17,7 +17,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -25,45 +24,18 @@ import net.minecraftforge.fml.common.Mod;
 public final class BDOPlayerEvent {
     @SubscribeEvent
     public static void playerTick(TickEvent.PlayerTickEvent event) {
-        /*
         if (!event.phase.equals(TickEvent.Phase.END)) return;
         Player player = event.player;
         Level level = player.level();
 
-        if (!player.isSprinting()) return;
-        if (level.isClientSide) return;
-
-        BlockHitResult blockhitresult = getPlayerPOVHitResult(level, player);
-        BlockPos pos = blockhitresult.getBlockPos();
-        BlockState state = level.getBlockState(pos);
-
-        if (!state.is(BlockTags.DOORS) || player.position().distanceTo(pos.getCenter()) >= 0.65D) return;
-        if (state.getValue(BlockStateProperties.OPEN)) return;
-
-        if (state.is(BlockTags.WOODEN_DOORS)) {
-            state.setValue(BlockStateProperties.OPEN, true);
-            level.playSound(null, pos, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.BLOCKS, 1.0F, 1.0F);
-            return;
-        }
-
-        if (BurstDoorOpenConfig.IRON_DOOR_BREAK_FLAG.get()) state.setValue(BlockStateProperties.OPEN, true);
-        level.playSound(null, pos, SoundEvents.ZOMBIE_ATTACK_IRON_DOOR, SoundSource.BLOCKS, 1.0F, 1.0F);
-        */
-    }
-
-    @SubscribeEvent
-    public static void onHarvestCheck(PlayerEvent.HarvestCheck event) {
-        Player player = event.getEntity();
-        Level level = player.level();
-
         if (level.isClientSide) return;
         if (!player.isSprinting()) return;
-
-        var state = event.getTargetBlock();
-        if (!state.is(BlockTags.DOORS)) return;
-        if (state.getValue(BlockStateProperties.OPEN)) return;
 
         BlockPos pos = getPlayerPOVHitResult(level, player).getBlockPos();
+        BlockState state = level.getBlockState(pos);
+
+        if (!state.is(BlockTags.DOORS)) return;
+        if (state.getValue(BlockStateProperties.OPEN)) return;
 
         var blockFace = state.getValue(DoorBlock.FACING);
         var newX = pos.getCenter().x() - blockFace.getStepX() * 0.5;
@@ -81,6 +53,7 @@ public final class BDOPlayerEvent {
 
         openDoor(level, pos, state, player);
         level.playSound(null, pos, SoundEvents.ZOMBIE_ATTACK_IRON_DOOR, SoundSource.BLOCKS, 1.0F, 1.0F);
+
     }
 
     private static void openDoor(Level level, BlockPos pos, BlockState state, Player player) {
