@@ -3,6 +3,7 @@ package ho.artisan.bdo.event;
 import ho.artisan.bdo.BurstDoorOpen;
 import ho.artisan.bdo.BurstDoorOpenConfig;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -13,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -44,23 +46,35 @@ public final class BDOPlayerEvent {
         if (euclidean(doorTruePos, player.position()) > 0.65) return;
 
         if (state.is(BlockTags.WOODEN_DOORS)) {
-            openDoor(level, pos, state, player);
+            openDoor(level, pos, state, player, blockFace);
             level.playSound(null, pos, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.BLOCKS, 1.0F, 1.0F);
             return;
         }
 
-        if (!BurstDoorOpenConfig.IRON_DOOR_BREAK_FLAG.get()) return;
-
-        openDoor(level, pos, state, player);
         level.playSound(null, pos, SoundEvents.ZOMBIE_ATTACK_IRON_DOOR, SoundSource.BLOCKS, 1.0F, 1.0F);
-
+        if (!BurstDoorOpenConfig.IRON_DOOR_BREAK_FLAG.get()) return;
+        openDoor(level, pos, state, player, blockFace);
     }
 
-    private static void openDoor(Level level, BlockPos pos, BlockState state, Player player) {
+    private static void openDoor(Level level, BlockPos pos, BlockState state, Player player, Direction face) {
         state = state.cycle(DoorBlock.OPEN);
         level.setBlock(pos, state, 10);
         level.gameEvent(player, GameEvent.BLOCK_OPEN, pos);
-    }
+
+        var side = state.getValue(DoorBlock.HINGE);
+        pos = side == DoorHingeSide.RIGHT
+                ? pos.offset(-face.getStepZ(), face.getStepY(), -face.getStepX())
+                : pos.offset(face.getStepZ(), face.getStepY(), face.getStepX());
+
+        state = level.getBlockState(pos);
+        if (!state.is(BlockTags.DOORS)) return;
+        if (state.getValue(BlockStateProperties.OPEN)) return;
+
+        state = state.cycle(DoorBlock.OPEN);
+        level.setBlock(pos, state, 10);
+        level.gameEvent(player, GameEvent.BLOCK_OPEN, pos);
+        }
+
 
     @SuppressWarnings("unused")
     private static double manhattanDistance(Vec3 pos1, Vec3 pos2) {
