@@ -28,7 +28,6 @@
     "fabricloader": "*",
     "minecraft": ">=1.21.2",
     "java": ">=21",
-    "fabric-lifecycle-events-v1": "*",
     "forgeconfigapiport": "*"
   }
 }
