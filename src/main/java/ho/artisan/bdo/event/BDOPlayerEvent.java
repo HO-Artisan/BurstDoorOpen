@@ -30,7 +30,7 @@ public final class BDOPlayerEvent {
         Player player = event.player;
         Level level = player.level();
 
-        if (level.isClientSide) return;
+        if (event.side.isClient()) return;
         if (!player.isSprinting()) return;
 
         BlockPos pos = getPlayerPOVHitResult(level, player).getBlockPos();
@@ -46,20 +46,18 @@ public final class BDOPlayerEvent {
         if (euclidean(doorTruePos, player.position()) > 0.65) return;
 
         if (state.is(BlockTags.WOODEN_DOORS)) {
-            openDoor(level, pos, state, player, blockFace);
+            openDoorWithNearby(level, pos, state, player, blockFace, true);
             level.playSound(null, pos, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.BLOCKS, 1.0F, 1.0F);
             return;
         }
 
         level.playSound(null, pos, SoundEvents.ZOMBIE_ATTACK_IRON_DOOR, SoundSource.BLOCKS, 1.0F, 1.0F);
         if (!BurstDoorOpenConfig.IRON_DOOR_BREAK_FLAG.get()) return;
-        openDoor(level, pos, state, player, blockFace);
+        openDoorWithNearby(level, pos, state, player, blockFace, false);
     }
 
-    private static void openDoor(Level level, BlockPos pos, BlockState state, Player player, Direction face) {
-        state = state.cycle(DoorBlock.OPEN);
-        level.setBlock(pos, state, 10);
-        level.gameEvent(player, GameEvent.BLOCK_OPEN, pos);
+    private static void openDoorWithNearby(Level level, BlockPos pos, BlockState state, Player player, Direction face, boolean isWooden) {
+        state = openDoor(level, pos, state, player);
 
         var side = state.getValue(DoorBlock.HINGE);
 
@@ -71,12 +69,17 @@ public final class BDOPlayerEvent {
         if (!state.is(BlockTags.DOORS)) return;
         if (state.getValue(BlockStateProperties.OPEN)) return;
         if (state.getValue(DoorBlock.HINGE) != (flag ? DoorHingeSide.LEFT : DoorHingeSide.RIGHT)) return;
+        if (state.is(BlockTags.WOODEN_DOORS) ^ isWooden) return;
 
+        openDoor(level, pos, state, player);
+    }
+
+    private static BlockState openDoor(Level level, BlockPos pos, BlockState state, Player player) {
         state = state.cycle(DoorBlock.OPEN);
         level.setBlock(pos, state, 10);
         level.gameEvent(player, GameEvent.BLOCK_OPEN, pos);
+        return state;
     }
-
 
     @SuppressWarnings("unused")
     private static double manhattanDistance(Vec3 pos1, Vec3 pos2) {
@@ -102,7 +105,7 @@ public final class BDOPlayerEvent {
         float f6 = f3 * f4;
         float f7 = f2 * f4;
         double d0 = player.getBlockReach();
-        Vec3 vec31 = vec3.add((double)f6 * d0, (double)f5 * d0, (double)f7 * d0);
+        Vec3 vec31 = vec3.add((double) f6 * d0, (double) f5 * d0, (double) f7 * d0);
         return level.clip(new ClipContext(vec3, vec31, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
     }
 }
