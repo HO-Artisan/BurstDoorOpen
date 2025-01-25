@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "bdo",
+  "version": "${version}",
+  "name": "BurstDoorOpen",
+  "description": "Burst door open! Come on!",
+  "authors": [
+    "Chemiofitor",
+    "RawDiamondMC"
+  ],
+  "contact": {
+    "homepage": "https://github.com/HO-Artisan/BurstDoorOpen",
+    "sources": "https://github.com/HO-Artisan/BurstDoorOpen",
+    "issues": "https://github.com/HO-Artisan/BurstDoorOpen/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/bdo/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "ho.artisan.bdo.BurstDoorOpen"
+    ]
+  },
+  "mixins": [
+    "bdo.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": ">=1.21.2",
+    "java": ">=21",
+    "fabric-lifecycle-events-v1": "*",
+    "forgeconfigapiport": "*"
+  }
+}
